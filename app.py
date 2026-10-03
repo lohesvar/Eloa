@@ -467,11 +467,18 @@ def create_app(config_class=Config):
             'is_supabase': is_postgres,
             'db_connected': db_connected,
             'db_error': db_error,
-            'deployment_ready': is_postgres and db_connected,
-            'message': 'Connected to Supabase PostgreSQL successfully!' if (is_postgres and db_connected) else (
-                'WARNING: Running on local SQLite! Set DATABASE_URL in Vercel settings to use Supabase.' if db_connected else f'Database connection error: {db_error}'
-            )
         }), 200 if db_connected else 500
+
+    @app.errorhandler(500)
+    def handle_500_error(e):
+        db.session.rollback()
+        app.logger.error(f"500 Internal Error: {e}")
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e),
+            "hint": "Check /health endpoint or DATABASE_URL environment variable in Vercel settings."
+        }), 500
+
 
 
     @app.route('/supabase-todos')
