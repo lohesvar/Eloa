@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Performance Analytics | Eloa{% endblock %}
+
+{% block content %}
+<div class="notebook-page notebook-ruled-bg">
+  
+  <div class="notebook-header">
+    <div>
+      <h1 class="notebook-title">
+        <span>📈</span> Eloa Analytics Journal
+      </h1>
+      <p class="notebook-subtitle">Track quantifiable results, completion trends, and consistency streaks over time</p>
+    </div>
+
+    <!-- Time Period Selector Buttons -->
+    <div class="period-selector">
+      <button class="period-btn" data-period="today">Today</button>
+      <button class="period-btn active" data-period="week">This Week</button>
+      <button class="period-btn" data-period="month">This Month</button>
+      <button class="period-btn" data-period="all">All Time</button>
+    </div>
+  </div>
+
+  <!-- Summary Statistics Row -->
+  <div class="notebook-section" style="margin-bottom: 2rem;">
+    <div class="analytics-grid">
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Total Logged Tasks</span>
+          <div class="stat-icon" style="background: var(--badge-bg); color: var(--text-main);">📝</div>
+        </div>
+        <div class="stat-value" id="stat-total-tasks">-</div>
+        <div class="stat-subtext">Across all horizons</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Completed Tasks</span>
+          <div class="stat-icon" style="background: var(--accent-green-light); color: var(--accent-green);">✅</div>
+        </div>
+        <div class="stat-value" id="stat-completed-tasks">-</div>
+        <div class="stat-subtext">Successfully finished</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Completion Rate</span>
+          <div class="stat-icon" style="background: var(--accent-blue-light); color: var(--accent-blue);">📊</div>
+        </div>
+        <div class="stat-value" id="stat-completion-rate">-</div>
+        <div class="stat-subtext">Overall target achievement</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Average Performance</span>
+          <div class="stat-icon" style="background: var(--accent-amber-light); color: var(--accent-amber);">⭐</div>
+        </div>
+        <div class="stat-value" id="stat-avg-performance">-</div>
+        <div class="stat-subtext">Measurable task efficiency</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Current Streak</span>
+          <div class="stat-icon" style="background: var(--accent-red-light); color: var(--accent-red);">🔥</div>
+        </div>
+        <div class="stat-value" id="stat-current-streak">-</div>
+        <div class="stat-subtext">Consecutive active days</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Longest Streak</span>
+          <div class="stat-icon" style="background: var(--badge-bg); color: var(--text-main);">🏆</div>
+        </div>
+        <div class="stat-value" id="stat-longest-streak">-</div>
+        <div class="stat-subtext">Best productivity run</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Interactive Charts Grid -->
+  <div class="notebook-section">
+    <div class="charts-wrapper">
+      
+      <!-- Main Performance Line Chart Card -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2 class="chart-title">
+            <span>📉</span> Productivity & Performance Over Time
+          </h2>
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-handwritten);">Daily % score & completion trend</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="performanceLineChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Task Breakdown Doughnut Chart Card -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2 class="chart-title">
+            <span>🍩</span> Status Distribution
+          </h2>
+        </div>
+        <div class="canvas-wrap" style="height: 220px;">
+          <canvas id="completionPieChart"></canvas>
+        </div>
+
+        <!-- Category Progress List inside Chart Card -->
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--paper-border);">
+          <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; font-family: var(--font-heading);">
+            Category Achievement Rates
+          </h3>
+          <div id="category-stats-list" class="category-progress-list">
+            <!-- Dynamic rendering from analytics.js -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

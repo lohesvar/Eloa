@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>To-Do List</title>
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+        
+        <style>
+            :root {
+                --bg-color: #09090b;
+                --card-bg: rgba(18, 18, 22, 0.75);
+                --border-color: rgba(229, 9, 20, 0.15);
+                --border-focus: #ff2e43;
+                --text-main: #f4f4f5;
+                --text-muted: #71717a;
+                --accent-red: #ff2e43;
+                --accent-red-hover: #e50914;
+                --accent-red-glow: rgba(255, 46, 67, 0.25);
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: var(--bg-color);
+                background-image: 
+                    radial-gradient(circle at 10% 20%, rgba(229, 9, 20, 0.05) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(229, 9, 20, 0.03) 0%, transparent 40%);
+                color: var(--text-main);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                padding: 40px 20px;
+            }
+
+            /* Container card */
+            .todo-card {
+                width: 100%;
+                max-width: 520px;
+                background: var(--card-bg);
+                backdrop-filter: blur(12px);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 30px;
+                box-shadow: 
+                    0 10px 30px rgba(0, 0, 0, 0.5),
+                    0 0 30px rgba(229, 9, 20, 0.05);
+                transition: border-color 0.3s ease;
+            }
+
+            .todo-card:hover {
+                border-color: rgba(255, 46, 67, 0.25);
+            }
+
+            /* Header section: Title & Add button */
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            h1 {
+                font-family: 'Outfit', sans-serif;
+                font-size: 24px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+                background: linear-gradient(to right, #ffffff 40%, var(--accent-red) 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            /* Add Task Button */
+            #add-task-btn {
+                background: linear-gradient(135deg, var(--accent-red) 0%, #b3001b 100%);
+                color: #ffffff;
+                border: none;
+                padding: 10px 16px;
+                border-radius: 8px;
+                font-family: 'Inter', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(255, 46, 67, 0.25);
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            #add-task-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px var(--accent-red-glow);
+                background: linear-gradient(135deg, #ff4d61 0%, var(--accent-red) 100%);
+            }
+
+            #add-task-btn:active {
+                transform: translateY(1px);
+                box-shadow: 0 2px 8px rgba(255, 46, 67, 0.2);
+            }
+
+            /* Task items */
+            #container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .task-item {
+                display: flex;
+                align-items: center;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                padding: 12px 14px;
+                margin-bottom: 12px;
+                border-radius: 10px;
+                transition: all 0.25s ease;
+                animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            }
+
+            .task-item:hover {
+                background: rgba(255, 46, 67, 0.02);
+                border-color: rgba(255, 46, 67, 0.2);
+                box-shadow: 0 0 12px rgba(255, 46, 67, 0.05);
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(12px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateY(-8px);
+                }
+            }
+
+            /* Task completion styling */
+            .task-item.completed {
+                opacity: 0.5;
+                background: rgba(0, 0, 0, 0.15);
+                border-color: rgba(255, 255, 255, 0.02);
+            }
+
+            .task-item.completed .task-input {
+                text-decoration: line-through;
+                color: var(--text-muted);
+            }
+
+            /* Custom Checkbox */
+            .checkbox-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                user-select: none;
+                margin-right: 12px;
+            }
+
+            .checkbox-wrapper input {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+                height: 0;
+                width: 0;
+            }
+
+            .checkmark {
+                height: 20px;
+                width: 20px;
+                background-color: rgba(255, 255, 255, 0.04);
+                border: 2px solid #3f3f46;
+                border-radius: 6px;
+                position: relative;
+                transition: all 0.2s ease;
+            }
+
+            .checkbox-wrapper:hover input ~ .checkmark {
+                border-color: var(--accent-red);
+                background-color: rgba(255, 46, 67, 0.05);
+            }
+
+            .checkbox-wrapper input:checked ~ .checkmark {
+                background-color: var(--accent-red);
+                border-color: var(--accent-red);
+                box-shadow: 0 0 8px rgba(255, 46, 67, 0.4);
+            }
+
+            .checkmark::after {
+                content: "";
+                position: absolute;
+                display: none;
+                left: 6px;
+                top: 2px;
+                width: 4px;
+                height: 9px;
+                border: solid #000000;
+                border-width: 0 2px 2px 0;
+                transform: rotate(45deg);
+            }
+
+            .checkbox-wrapper input:checked ~ .checkmark::after {
+                display: block;
+            }
+
+            /* Task Input Textbox */
+            .task-input {
+                flex: 1;
+                background: transparent;
+                border: none;
+                outline: none;
+                color: var(--text-main);
+                font-family: 'Inter', sans-serif;
+                font-size: 15px;
+                font-weight: 400;
+                padding: 4px 6px;
+                transition: color 0.25s ease;
+            }
+
+            .task-input::placeholder {
+                color: var(--text-muted);
+            }
+
+            /* Delete Button */
+            .delete-btn {
+                background: transparent;
+                border: none;
+                color: var(--text-muted);
+                cursor: pointer;
+                padding: 6px;
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+                opacity: 0.6;
+            }
+
+            .task-item:hover .delete-btn {
+                opacity: 1;
+            }
+
+            .delete-btn:hover {
+                color: var(--accent-red);
+                background: rgba(255, 46, 67, 0.1);
+            }
+
+            /* Empty state message */
+            .empty-state {
+                text-align: center;
+                padding: 40px 20px;
+                color: var(--text-muted);
+                font-size: 14px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .empty-state svg {
+                color: rgba(255, 255, 255, 0.07);
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="todo-card">
+            <div class="header">
+                <h1>To-Do List</h1>
+                <button id="add-task-btn" onclick="addItem()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Task
+                </button>
+            </div>
+            
+            <div id="container">
+                <!-- Task items will be inserted here dynamically -->
+                <div class="empty-state" id="empty-state">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                        <line x1="9" y1="11" x2="15" y2="11"></line>
+                    </svg>
+                    No tasks yet. Click "Add Task" to get started!
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function updateEmptyState() {
+                const container = document.getElementById("container");
+                const emptyState = document.getElementById("empty-state");
+                const hasTasks = container.querySelectorAll(".task-item").length > 0;
+                
+                if (hasTasks) {
+                    if (emptyState) emptyState.style.display = "none";
+                } else {
+                    if (emptyState) emptyState.style.display = "flex";
+                }
+            }
+
+            function addItem() {
+                const container = document.getElementById("container");
+                
+                // Hide empty state if present
+                const emptyState = document.getElementById("empty-state");
+                if (emptyState) {
+                    emptyState.style.display = "none";
+                }
+
+                // Create the task item row
+                const taskItem = document.createElement("div");
+                taskItem.className = "task-item";
+                
+                // Create custom checkbox label wrapper
+                const checkboxWrapper = document.createElement("label");
+                checkboxWrapper.className = "checkbox-wrapper";
+                
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.onchange = function() {
+                    if (checkbox.checked) {
+                        taskItem.classList.add("completed");
+                    } else {
+                        taskItem.classList.remove("completed");
+                    }
+                };
+                
+                const checkmark = document.createElement("span");
+                checkmark.className = "checkmark";
+                
+                checkboxWrapper.appendChild(checkbox);
+                checkboxWrapper.appendChild(checkmark);
+                
+                // Create text input
+                const textbox = document.createElement("input");
+                textbox.type = "text";
+                textbox.className = "task-input";
+                textbox.placeholder = "Enter task...";
+                
+                // Create delete button
+                const deleteBtn = document.createElement("button");
+                deleteBtn.className = "delete-btn";
+                deleteBtn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                `;
+                deleteBtn.onclick = function() {
+                    taskItem.style.animation = "slideOut 0.2s ease forwards";
+                    taskItem.addEventListener("animationend", function() {
+                        taskItem.remove();
+                        updateEmptyState();
+                    });
+                };
+                
+                // Append all elements to task item
+                taskItem.appendChild(checkboxWrapper);
+                taskItem.appendChild(textbox);
+                taskItem.appendChild(deleteBtn);
+                
+                // Append task item to container
+                container.appendChild(taskItem);
+                
+                // Focus textbox immediately for typing
+                textbox.focus();
+            }
+        </script>
+    </body>
+</html>

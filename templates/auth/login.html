@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In | Eloa{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Welcome Back</h2>
+      <p>Open your Eloa notebook</p>
+    </div>
+
+    <form action="{{ url_for('login') }}" method="POST" class="auth-form">
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input type="text" id="username" name="username" class="form-input" value="{{ username or '' }}" placeholder="Enter your username" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+        <input type="checkbox" id="remember" name="remember" checked>
+        <label for="remember" style="font-size: 0.88rem; color: var(--text-muted); cursor: pointer;">Remember me on this browser</label>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem;">
+        Log In to Eloa
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Don't have an account yet? <a href="{{ url_for('signup') }}">Create an Account</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

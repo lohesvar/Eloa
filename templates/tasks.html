@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}My Notebook | Eloa{% endblock %}
+
+{% block content %}
+<div class="notebook-page notebook-ruled-bg">
+  
+  <div class="notebook-header">
+    <div>
+      <h1 class="notebook-title">
+        <span>📖</span> Eloa Notebook
+      </h1>
+      <p class="notebook-subtitle">Organized by time horizons: Long-Term, Short-Term & Daily Focus</p>
+    </div>
+
+    <div>
+      <button onclick="openNewTaskModal('daily')" class="btn btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Entry
+      </button>
+    </div>
+  </div>
+
+  <div class="task-sections-container">
+    
+    <!-- SECTION A: LONG-TERM GOALS -->
+    <div class="notebook-section">
+      <div class="section-header-bar">
+        <div class="section-title">
+          <span>🌟</span> A. Long-Term Goals & Vision
+          <span class="section-tag tag-long_term">Weeks & Months</span>
+        </div>
+        <button onclick="openNewTaskModal('long_term')" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+          + Add Long-Term Goal
+        </button>
+      </div>
+
+      {% if long_term_tasks %}
+        <ul class="task-list">
+          {% for task in long_term_tasks %}
+            {% include '_task_item.html' %}
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-notebook-state">
+          <p>No long-term goals logged yet. Write down your vision for the future!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- SECTION B: SHORT-TERM GOALS -->
+    <div class="notebook-section">
+      <div class="section-header-bar">
+        <div class="section-title">
+          <span>⏱️</span> B. Short-Term Tasks & Milestones
+          <span class="section-tag tag-short_term">Days & Weeks</span>
+        </div>
+        <button onclick="openNewTaskModal('short_term')" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+          + Add Short-Term Task
+        </button>
+      </div>
+
+      {% if short_term_tasks %}
+        <ul class="task-list">
+          {% for task in short_term_tasks %}
+            {% include '_task_item.html' %}
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-notebook-state">
+          <p>No short-term tasks. Break down your goals into actionable milestones.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- SECTION C: DAILY TASKS -->
+    <div class="notebook-section">
+      <div class="section-header-bar">
+        <div class="section-title">
+          <span>☀️</span> C. Daily Tasks & Habits
+          <span class="section-tag tag-daily">Everyday Focus</span>
+        </div>
+        <button onclick="openNewTaskModal('daily')" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+          + Add Daily Task
+        </button>
+      </div>
+
+      {% if daily_tasks %}
+        <ul class="task-list">
+          {% for task in daily_tasks %}
+            {% include '_task_item.html' %}
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-notebook-state">
+          <p>No daily tasks logged. Build routine habits for daily growth.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

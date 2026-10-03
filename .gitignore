@@ -1,0 +1,25 @@
+# Environment variables and secrets
+.env
+.env.local
+
+# Python caches & virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Database and instances
+instance/
+*.db
+*.sqlite3
+
+# Node modules (if any)
+node_modules/
+
+# User log files containing credentials
+registered_users.md

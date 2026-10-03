@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Eloa{% endblock %}</title>
+  <meta name="description" content="Eloa - A personal productivity notebook to plan long-term goals, short-term tasks, daily habits, and performance analytics.">
+  
+  <!-- Favicon Tab Icon -->
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2225%22 fill=%22url(%23g)%22/><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22><stop offset=%220%25%22 stop-color=%22%23d97706%22/><stop offset=%22100%25%22 stop-color=%22%23ef4444%22/></linearGradient></defs><text y=%22.72em%22 font-size=%2265%22 x=%2215%22>✍️</text></svg>">
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/notebook.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+  
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- App Header & Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}" class="brand-logo">
+        <div class="brand-icon">✍️</div>
+        <div class="brand-title">Eloa</div>
+      </a>
+
+      {% if current_user.is_authenticated %}
+      <nav>
+        <ul class="nav-menu">
+          <li>
+            <a href="{{ url_for('dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'dashboard' }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('tasks') }}" class="nav-link {{ 'active' if request.endpoint == 'tasks' }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <span>To-Do</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('analytics') }}" class="nav-link {{ 'active' if request.endpoint == 'analytics' }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('profile') }}" class="nav-link {{ 'active' if request.endpoint == 'profile' }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Profile</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
+
+      <div class="header-actions">
+        <!-- Light / Dark Theme Switcher Button -->
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <span id="theme-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </span>
+        </button>
+
+        {% if current_user.is_authenticated %}
+        <div class="user-pill">
+          <div class="avatar-circle">{{ current_user.username[0].upper() }}</div>
+          <span>{{ current_user.username }}</span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn-logout" title="Logout">Logout</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="main-wrapper">
+    <!-- Flash Notifications -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              <span>{{ message }}</span>
+              <button onclick="this.parentElement.remove()" style="background:none; border:none; color:inherit; cursor:pointer; font-weight:bold;">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Universal Task Creation & Edit Modal -->
+  {% if current_user.is_authenticated %}
+  <div id="task-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-form-title" class="modal-title">New Notebook Task</h3>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form id="task-form">
+        <input type="hidden" id="task_id">
+
+        <div class="form-group">
+          <label class="form-label" for="task_title">Task / Goal Title *</label>
+          <input type="text" id="task_title" class="form-input" placeholder="e.g., Learn React or Study for 2 hours" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="task_category">Category Horizon *</label>
+            <select id="task_category" class="form-select" required>
+              <option value="daily">☀️ Daily Tasks</option>
+              <option value="short_term">⏱️ Short-Term Goals</option>
+              <option value="long_term">🌟 Long-Term Goals</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task_priority">Priority *</label>
+            <select id="task_priority" class="form-select" required>
+              <option value="medium">Medium Priority</option>
+              <option value="high">🔥 High Priority</option>
+              <option value="low">Low Priority</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task_due_date">Target Due Date</label>
+          <input type="date" id="task_due_date" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task_description">Notes / Description</label>
+          <textarea id="task_description" class="form-textarea" rows="2" placeholder="Add additional details or notebook thoughts..."></textarea>
+        </div>
+
+        <!-- Task Performance Options (Measurable vs Non-measurable) -->
+        <div class="form-group" style="background: var(--badge-bg); padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
+          <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.9rem; font-weight: 600;">
+            <input type="checkbox" id="is_measurable">
+            <span>Track Measurable Performance Target (e.g. 3 hours, 20 pages)</span>
+          </label>
+        </div>
+
+        <div id="measurable-fields" style="display: none; padding-bottom: 0.5rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group">
+              <label class="form-label" for="target_value">Target</label>
+              <input type="number" step="0.1" id="target_value" class="form-input" placeholder="e.g. 3.0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="actual_value">Actual</label>
+              <input type="number" step="0.1" id="actual_value" class="form-input" placeholder="e.g. 2.5">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="unit">Unit</label>
+              <input type="text" id="unit" class="form-input" placeholder="hours, pgs">
+            </div>
+          </div>
+        </div>
+
+        <div id="non-measurable-fields">
+          <div class="form-group">
+            <label class="form-label" for="progress_assessment">Qualitative Progress Assessment</label>
+            <select id="progress_assessment" class="form-select">
+              <option value="not_started">Not Started (0%)</option>
+              <option value="started">Started (30%)</option>
+              <option value="partially_completed">Partially Completed (60%)</option>
+              <option value="completed">Completed (100%)</option>
+              <option value="excellent">Excellent Performance (100%)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save to Notebook</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>&copy; 2026 <span>Eloa</span> • Stay Focused & Inspired</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+</body>
+</html>
