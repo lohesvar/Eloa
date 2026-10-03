@@ -3,9 +3,11 @@ from datetime import datetime, date, timedelta, timezone
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from sqlalchemy import func, text
+from supabase import create_client, Client
 
 from config import Config
 from models import db, User, Task, AnalyticsLog
+
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -471,7 +473,30 @@ def create_app(config_class=Config):
             )
         }), 200 if db_connected else 500
 
+
+    @app.route('/supabase-todos')
+    def supabase_todos():
+        url = app.config.get('SUPABASE_URL') or os.environ.get('SUPABASE_URL')
+        key = app.config.get('SUPABASE_KEY') or os.environ.get('SUPABASE_KEY')
+        if not url or not key:
+            return "<h1>Supabase Credentials Missing</h1><p>Set SUPABASE_URL and SUPABASE_KEY environment variables.</p>", 400
+
+        try:
+            supabase_client: Client = create_client(url, key)
+            response = supabase_client.table('todos').select("*").execute()
+            todos = response.data
+
+            html = '<h1>Todos from Supabase</h1><ul>'
+            for todo in todos:
+                title = todo.get("name") or todo.get("title") or "Untitled Todo"
+                html += f'<li>{title}</li>'
+            html += '</ul>'
+            return html
+        except Exception as e:
+            return f"<h1>Supabase API Error</h1><p>{e}</p>", 500
+
     return app
+
 
 
 app = create_app()
