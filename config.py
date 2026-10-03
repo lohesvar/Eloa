@@ -15,7 +15,10 @@ db_url = (
 
 if db_url:
     if db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql://", 1)
+        db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif db_url.startswith("postgresql://"):
+        db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
 else:
     # Use /tmp on serverless environments like Vercel if instance dir is non-writable
     tmp_dir = '/tmp' if os.path.exists('/tmp') else os.path.join(BASE_DIR, 'instance')
