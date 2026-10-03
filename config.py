@@ -16,9 +16,12 @@ db_url = (
 if db_url:
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
-    elif db_url.startswith("postgresql://"):
+    elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+psycopg2://"):
         db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
+    if "sslmode" not in db_url and "sqlite" not in db_url:
+        sep = "&" if "?" in db_url else "?"
+        db_url = f"{db_url}{sep}sslmode=require"
 else:
     # Use /tmp on serverless environments like Vercel if instance dir is non-writable
     tmp_dir = '/tmp' if os.path.exists('/tmp') else os.path.join(BASE_DIR, 'instance')
@@ -32,7 +35,9 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
+        "connect_args": {"connect_timeout": 5} if "postgresql" in db_url else {}
     }
+
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     SUPABASE_URL = os.environ.get('SUPABASE_URL')
